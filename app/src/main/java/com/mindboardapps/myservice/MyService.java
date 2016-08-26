@@ -28,31 +28,34 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        final String id = intent.getStringExtra(EXTRA_ID);
+        if (ACTION_DOWNLOAD.equals(intent.getAction())) {
 
-        taskStarted();
-
-        new Thread(){
-            public void run(){
-                for(int i=0; i<12; i++) {
-                    try {
-                        Thread.sleep(1000);
-
-                        Intent broadcast = new Intent(ACTION_PROCESSING);
-                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcast);
-
-                    } catch (Exception e) {
+            final String id = intent.getStringExtra(EXTRA_ID);
+    
+            taskStarted();
+    
+            new Thread(){
+                public void run(){
+                    for(int i=0; i<12; i++) {
+                        try {
+                            Thread.sleep(1000);
+    
+                            Intent broadcast = new Intent(ACTION_PROCESSING);
+                            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcast);
+    
+                        } catch (Exception e) {
+                        }
                     }
+    
+                    Intent broadcast = new Intent(ACTION_COMPLETED);
+                    broadcast.putExtra(EXTRA_ID, id);
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcast);
+    
+                    // Mark task completed
+                    taskCompleted();
                 }
-
-                Intent broadcast = new Intent(ACTION_COMPLETED);
-                broadcast.putExtra(EXTRA_ID, id);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcast);
-
-                // Mark task completed
-                taskCompleted();
-            }
-        }.start();
+            }.start();
+        }
 
         return START_REDELIVER_INTENT;
     }
